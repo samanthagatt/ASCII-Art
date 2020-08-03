@@ -1,0 +1,16 @@
+<html>
+<body>
+    <p>Enter an image URL: <input type="text" id="url" /></p>
+    <p>* Only works with .jpg's</p>
+    <p><button onClick="submitURL();">Submit</button></p>
+    <pre id="output" style="font: 1px/1px monospace;"></pre>
+
+    <script>
+        const submitURL = () => {
+            const url = $("#url").val();
+            $.get("/fetch", {url: url}, data => $("#output").text(data));
+        };
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</body>
+</html>
