@@ -15,23 +15,25 @@ public func routes(_ router: Router) throws {
         try image(from: req).map(to: String.self) { img in
             guard let img = img else { throw Abort(.internalServerError) }
             let asciis = ["M", "#", "m", "@", "%", "C", "t", "]", "?", "~"]
-            let blockSize = 2
+            let blockSize = req.query["blockSize"] ?? 2
             var rows: [[String]] = []
             // Avoids continuous reallocation when you already know how long it will be
-            rows.reserveCapacity(img.size.height)
+            rows.reserveCapacity(img.size.height / blockSize)
             for y in stride(from: 0, to: img.size.height, by: blockSize) {
                 var row: [String] = []
-                row.reserveCapacity(img.size.width)
+                row.reserveCapacity(img.size.width / blockSize)
                 for x in stride(from: 0, to: img.size.width, by: blockSize) {
                     let color = img.get(pixel: Point(x: x, y: y))
-                    let brightness = color.redComponent + color.greenComponent +
-                        color.blueComponent
-                    let sum = Int(round(brightness * 3))
+                    let red = color.redComponent * 0.299
+                    let green = color.greenComponent * 0.587
+                    let blue = color.blueComponent * 0.114
+                    let brightness = red + green + blue
+                    let sum = Int(round(brightness * 9))
                     row.append(asciis[sum])
                 }
                 rows.append(row)
             }
-            return rows.reduce("") { $0 + $1.joined(separator: " ") + "\n"}
+            return rows.reduce("") { $0 + $1.joined(separator: "•") + "\n"}
         }
     }
 }
